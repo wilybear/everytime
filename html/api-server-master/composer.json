@@ -1,0 +1,9 @@
+{
+    "require": {
+        "nikic/fast-route": "^1.2",
+        "firebase/php-jwt": "^5.0",
+        "phpmailer/phpmailer": "^6.0",
+        "google/apiclient": "^2.0",
+        "monolog/monolog": "~1.12"
+    }
+}
