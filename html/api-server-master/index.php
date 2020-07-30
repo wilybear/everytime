@@ -34,14 +34,12 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
 
     $r->addRoute('GET', '/category', ['PostController', 'category']);
     $r->addRoute('POST', '/post/write', ['PostController', 'createPost']);
-    $r->addRoute('GET', '/{categoryId}/{boardId}/list', ['PostController', 'postList']);
+    $r->addRoute('GET', '/post/list', ['PostController', 'postList']);
     //$r->addRoute('GET', '/{categoryId}/{boardId}/post/{postId}', ['IndexController', 'postList']);
     $r->addRoute('GET', '/post/{postId}', ['PostController', 'viewPost']);
     $r->addRoute('DELETE', '/post', ['PostController', 'deletePost']);
     $r->addRoute('PUT', '/post', ['PostController', 'updatePost']);
     $r->addRoute('GET', '/post', ['PostController', 'searchPost']);
-    $r->addRoute('GET', '/hot', ['PostController', "hotPostList"]);
-    $r->addRoute('GET', '/best', ['PostController', "bestPostList"]);
 
     $r->addRoute('POST', '/post/like', ['CommentController', 'like']);
     $r->addRoute('POST', '/post/scrap', ['CommentController', 'scrap']);

@@ -47,11 +47,22 @@ try {
             break;
         case "postList":
             http_response_code(200);
-            $res->result =  getPostListByBoardId($vars["boardId"]);
-            $res->isSuccess = TRUE;
-            $res->code = 100;
-            $res->message = "테스트 성공";
-            echo json_encode($res, JSON_NUMERIC_CHECK);
+            switch ($_GET["option"]){
+                case "all":
+                    //여기 문제있어
+                    $res->result =  getPostListByBoardId($_GET["boardId"]);
+                    break;
+                case "hot":
+                    $res->result = getHotPosts();
+                    successRes($res,"hot게시판 불러오기");
+                    break;
+                case "best":
+                    $res->result = getBestPosts();
+                    successRes($res,"best게시판 불러오기");
+                    break;
+                case "default":
+                    failRes($res,"wrong option",200);
+            }
             break;
         case "viewPost":
             http_response_code(200);
@@ -65,8 +76,8 @@ try {
         case "deletePost":
             http_response_code(200);
             //작성자만 지울수 있게
-            IF(isDeletePermission($req->postId,$req->postId)){
-                deletePost($req->postId);
+            IF(isDeletePermission($_GET["postId"],$_GET["userNo"])){
+                deletePost($_GET["postId"]);
                 $res->isSuccess = TRUE;
                 $res->code = 100;
                 $res->message = "테스트 성공";
@@ -96,7 +107,6 @@ try {
             break;
         case "bestPostList":
             http_response_code(200);
-            $res->result = getBestPosts();
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "테스트 성공";
@@ -104,7 +114,6 @@ try {
             break;
         case "hotPostList":
             http_response_code(200);
-            $res->result = getHotPosts();
             $res->isSuccess = TRUE;
             $res->code = 100;
             $res->message = "테스트 성공";
