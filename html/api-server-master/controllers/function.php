@@ -28,6 +28,7 @@ function isValidHeader($jwt, $key)
     }
 }
 
+
 function sendFcm($fcmToken, $data, $key, $deviceType)
 {
     $url = 'https://fcm.googleapis.com/fcm/send';
@@ -172,4 +173,18 @@ function getLogs($path)
     }
 //        fpassthru($fp);
     fclose($fp);
+}
+
+function successRes($res,$message){
+    $res->isSuccess = TRUE;
+    $res->code = 100;
+    $res->message = $message;
+    echo json_encode($res, JSON_NUMERIC_CHECK);
+}
+
+function failRes($res,$message,$code){
+    $res->isSuccess = FALSE;
+    $res->code = $code;
+    $res->message = $message;
+    echo json_encode($res, JSON_NUMERIC_CHECK);
 }

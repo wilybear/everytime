@@ -55,24 +55,19 @@ function getRecentPosts($categoryId){
     return $res;
 }
 
-function getPostListByBoardId($boardId){
+function getPostListByBoardId($boardId,$lastIdx){
     $pdo = pdoSqlConnect();
-    $query = "select * from
-    (select Post.postId, count(commentId) as commentCnt  ,title,content,Post.createTime,Post.writerNo
-    from Post left outer join Comment on Post.postId = Comment.postId
-    where boardId = ?
-    group by Post.postId)CommentTT
-    natural join(select Post.postId, count(userNo) as likeCnt from
-    Post left outer join LikeTB on Post.postId = LikeTB.postId
-    where boardId = ?
-    group by Post.postId)likeTT
-    order by createTime DESC
-    limit 0, 10;";
+    $query = "select postId, title, content, createTime, writerNo from Post 
+where boardId = ? and isDeleted = 0 order by createTime DESC limit ".$lastIdx.",10;";
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
-    $st->execute([$boardId,$boardId]);
+    $st->execute([$boardId]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
+    foreach ($res as $key => $result){
+        $res[$key]["likeCnt"] = getLikeCnt($result["postId"]);
+        $res[$key]["CommentCnt"] = getCommentCnt($result["postId"]);
+    }
 
     $st = null;
     $pdo = null;
@@ -80,72 +75,56 @@ function getPostListByBoardId($boardId){
     return $res;
 }
 
-function getPostListByUserNo($userNo){
+function getPostListByUserNo($userNo,$lastIdx){
     $pdo = pdoSqlConnect();
-    $query = "select * from
-    (select Post.postId, count(commentId) as commentCnt  ,title,content,Post.createTime,Post.writerNo
-    from Post left outer join Comment on Post.postId = Comment.postId
-    where Post.writerNo = ?
-    group by Post.postId)CommentTT
-    natural join(  select Post.postId, count(userNo) as likeCnt from
-    Post left outer join LikeTB on Post.postId = LikeTB.postId
-    where writerNo = ?
-    group by Post.postId)likeTT
-    order by createTime DESC
-    limit 0, 10;";
-    $st = $pdo->prepare($query);
-    $st->execute([$userNo,$userNo]);
-    $st->setFetchMode(PDO::FETCH_ASSOC);
-    $res = $st->fetchAll();
-
-    $st = null;
-    $pdo = null;
-
-    return $res;
-}
-function getPostListByComment($userNo){
-    $pdo = pdoSqlConnect();
-    $query = "select * from
-        (select Post.postId, count(commentId) as commentCnt  ,title,content,Post.createTime,Post.writerNo
-        from Post left outer join Comment on Post.postId = Comment.postId
-        where Comment.writerNo = ?
-        group by Post.postId) as CommentTT
-    natural join(  select Post.postId, count(userNo) as likeCnt from
-        Post left outer join LikeTB on Post.postId = LikeTB.postId
-        group by Post.postId)likeTT
-    order by createTime DESC
-    limit 0, 10;";
+    $query = "select postId, title, content, createTime, writerNo from Post where writerNo = ? and isDeleted = 0 order by createTime DESC limit ".$lastIdx.",10;";
     $st = $pdo->prepare($query);
     $st->execute([$userNo]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
+    foreach ($res as $key => $result){
+        $res[$key]["likeCnt"] = getLikeCnt($result["postId"]);
+        $res[$key]["CommentCnt"] = getCommentCnt($result["postId"]);
+    }
+    $st = null;
+    $pdo = null;
 
+    return $res;
+}
+function getPostListByComment($userNo,$lastIdx){
+    $pdo = pdoSqlConnect();
+    $query = "select Post.postId, title, content, Post.createTime, Post.writerNo from Post left outer join Comment on Post.postId = Comment.postId
+    where Comment.writerNo = ? and Post.isDeleted = 0
+    order by createTime DESC
+    limit ".$lastIdx.",10;";
+    $st = $pdo->prepare($query);
+    $st->execute([$userNo]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    foreach ($res as $key => $result){
+        $res[$key]["likeCnt"] = getLikeCnt($result["postId"]);
+        $res[$key]["CommentCnt"] = getCommentCnt($result["postId"]);
+    }
     $st = null;
     $pdo = null;
 
     return $res;
 }
 
-function getPostListByScrap($userNo){
+function getPostListByScrap($userNo,$lastIdx){
     $pdo = pdoSqlConnect();
-    $query = "select * from 
-(select Post.postId, count(commentId) as commentCnt  ,title,content,Post.createTime,Post.writerNo
-from Post left outer join Comment on Post.postId = Comment.postId
-inner join Scrap on Post.postId = Scrap.postId
-where Scrap.userNo = ?
-group by Post.postId) as CommentTT
-    natural join( select Post.postId, count(LikeTB.userNo) as likeCnt from
-    Post left outer join LikeTB on Post.postId = LikeTB.postId
-    inner join Scrap on Post.postId = Scrap.postId
-    where Scrap.userNo = ?
-    group by Post.postId)likeTT
-order by createTime DESC
-    limit 0, 10;";
+    $query = "select Post.postId, title, content, Post.createTime, Post.writerNo from Post left outer join Scrap on Post.postId = Scrap.postId
+    where Scrap.userNo = ? and isDeleted = 0
+    order by createTime DESC
+    limit ".$lastIdx.", 10;";
     $st = $pdo->prepare($query);
-    $st->execute([$userNo,$userNo]);
+    $st->execute([$userNo]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
-
+    foreach ($res as $key => $result){
+        $res[$key]["likeCnt"] = getLikeCnt($result["postId"]);
+        $res[$key]["CommentCnt"] = getCommentCnt($result["postId"]);
+    }
     $st = null;
     $pdo = null;
 
@@ -154,22 +133,20 @@ order by createTime DESC
 
 function getPost($postId){
     $pdo = pdoSqlConnect();
-    $query = "select nickName,profileImg,Title,content,IFNULL(likeCnt,0),IFNULL(commentCnt,0),IFNULL(scrapCnt,0),createTime from
-(select postId,writerNo,Title,content,createTime from Post where postId = :postId)PostT
-left outer join (select postId, count(commentId)commentCnt from Comment group by postId having postId = :postId)commentT
-    using(postId)
-left outer join (select postId, count(userNo)likeCnt from LikeTB group by postId having postId = :postId)likeT
-    using(postId)
-left outer join (select postId, count(userNo)scrapCnt from Scrap group by postId having postId = :postId)scrapT
-    using (postId)
-left outer join (select no as writerNo,nickName,profileImg from User where User.no = (SELECT writerNo from Post where postId = :postId))UserT
-    using (writerNo);
-";
+    $query = "select postId,writerNo,Title,content,createTime from Post where postId = :postId
+ and isDeleted = 0";
     $st = $pdo->prepare($query);
     $st->bindParam(":postId",$postId);
     $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
+    foreach ($res as $key => $result){
+        $res[$key]["likeCnt"] = getLikeCnt($result["postId"]);
+        $res[$key]["CommentCnt"] = getCommentCnt($result["postId"]);
+        $res[$key]["ScrapCnt"] = getScrapCnt($result["postId"]);
+        $res[$key] += getUserInfo($result["writerNo"]);
+        $res[$key]["comment"] = getComments($postId);
+    }
 
     $st = null;
     $pdo = null;
@@ -199,7 +176,7 @@ function updatePost($postId,$title,$content){
     $pdo = null;
 }
 
-function isDeletePermission($postId, $userNo){
+function isUpdatePermissionOnPost($postId, $userNo){
     $pdo = pdoSqlConnect();
     $query = "SELECT EXISTS(SELECT * FROM Post WHERE postId= ? AND writerNo = ?) AS exist;";
 
@@ -214,24 +191,19 @@ function isDeletePermission($postId, $userNo){
 
 }
 
-function searchPost($searchKey){
+function searchPost($searchKey,$lastIdx){
     $pdo = pdoSqlConnect();
-    $query = "select * from
-(select Post.postId, count(commentId) as commentCnt ,title,content,Post.createTime,Post.writerNo
-from Post left outer join Comment on Post.postId = Comment.postId
-where  title LIKE ? OR content LIKE ?
-group by Post.postId) as A
-natural join( select Post.postId, count(userNo) as likeCnt from
-Post left outer join LikeTB on Post.postId = LikeTB.postId
-group by Post.postId)B
-order by createTime DESC
-limit 0, 10;";
+    $query = "select postId,title,content,Post.createTime,writerNo from Post where title LIKE ? OR content LIKE ?
+ order by createTime DESC limit ".$lastIdx.", 10;";
     $st = $pdo->prepare($query);
     //$st->bindParam(":searchKey","%".$searchKey."%");
     $st->execute(["%".$searchKey."%","%".$searchKey."%"]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
-
+    foreach ($res as $key => $result){
+        $res[$key]["likeCnt"] = getLikeCnt($result["postId"]);
+        $res[$key]["CommentCnt"] = getCommentCnt($result["postId"]);
+    }
     $st = null;
     $pdo = null;
 
@@ -239,7 +211,7 @@ limit 0, 10;";
 }
 
 
-function getHotPosts(){
+function getHotPosts($lastIdx){
     $pdo = pdoSqlConnect();
     $query = "select * from
     (select Post.postId, count(commentId) as commentCnt  ,title,content,Post.createTime,Post.writerNo
@@ -250,7 +222,7 @@ function getHotPosts(){
     group by Post.postId)likeTT
     where likeCnt > 10
     order by createTime DESC
-    limit 0, 10;";
+    limit ".$lastIdx.", 10;";
     $st = $pdo->prepare($query);
     $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -262,7 +234,7 @@ function getHotPosts(){
     return $res;
 }
 
-function getBestPosts(){
+function getBestPosts($lastIdx){
     $pdo = pdoSqlConnect();
     $query = "select * from
     (select Post.postId, count(commentId) as commentCnt  ,title,content,Post.createTime,Post.writerNo
@@ -273,7 +245,7 @@ function getBestPosts(){
     group by Post.postId)likeTT
     where likeCnt > 100
     order by createTime DESC
-    limit 0, 10;";
+    limit ".$lastIdx.", 10;";
     $st = $pdo->prepare($query);
     $st->execute();
     $st->setFetchMode(PDO::FETCH_ASSOC);
@@ -283,4 +255,90 @@ function getBestPosts(){
     $pdo = null;
 
     return $res;
+}
+
+function getCommentCnt($postId){
+    $pdo = pdoSqlConnect();
+    $query = "select count(commentId)as commentCnt from Comment where postId =?;";
+    $st = $pdo->prepare($query);
+    $st->execute([$postId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]["commentCnt"];
+}
+
+function getLikeCnt($postId){
+    $pdo = pdoSqlConnect();
+    $query = "select count(userNo) as likeCnt from LikeTB where postId = ?;";
+    $st = $pdo->prepare($query);
+    $st->execute([$postId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]["likeCnt"];
+}
+
+function getScrapCnt($postId){
+    $pdo = pdoSqlConnect();
+    $query = "select count(userNo) as scrapCnt from Scrap where postId = ?;";
+    $st = $pdo->prepare($query);
+    $st->execute([$postId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0]["scrapCnt"];
+}
+
+function getUserInfo($writerNo){
+    $pdo = pdoSqlConnect();
+    $query = "select no as writerNo,nickName,profileImg from User where User.no = ?";
+    $st = $pdo->prepare($query);
+    $st->execute([$writerNo]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st = null;
+    $pdo = null;
+
+    return $res[0];
+}
+
+function isValidCategory($categoryId){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Category WHERE no = ?) AS exist;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$categoryId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
+
+}
+
+function isValidPost($postId){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Post WHERE postId = ? and isDeleted = 0) AS exist;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$postId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
+
 }

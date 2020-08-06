@@ -94,9 +94,9 @@ function updateComment($commentId,$contents){
     $pdo = null;
 }
 
-function isCommentExists($postId, $reply){
+function isCommentExistsInPost($postId, $reply){
     $pdo = pdoSqlConnect();
-    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE postId= ? AND commentId = ?) AS exist;";
+    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE postId= ? AND commentId = ? AND isDeleted = 0) AS exist;";
 
     $st = $pdo->prepare($query);
     //    $st->execute([$param,$param]);
@@ -119,44 +119,80 @@ function deleteComment($commentId){
     $pdo = null;
 }
 
-function viewComments($postId){
+function getComments($postId){
     $pdo = pdoSqlConnect();
-    $query = "select A.commentId,contents,isDeleted,createTime,A.writerNo,nickName,profileImg,IFNULL(likeCnt,0) as likeCnt from
-(SELECT contents,isDeleted,createTime,writerNo,commentId from Comment where postId = ?
-    and reply is null)A
-natural join (
-select no as writerNo ,nickName,profileImg from User)B
-left outer join (select commentId,count(userNo) as likeCnt from CommentLike group by commentId)C
-on A.commentId = C.commentId
+    $query = "select commentId,writerNo,contents,isDeleted from Comment where postId = ? and reply is null
 order by createTime;";
     $st = $pdo->prepare($query);
     $st->execute([$postId]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
-
+    foreach ($res as $key => $result){
+        $res[$key]["commentCnt"] =  getCommentLikeCnt($result["commentId"]);
+        $res[$key]["reply"] = getReplies($result["commentId"]);
+    }
     $st = null;
     $pdo = null;
 
     return $res;
 }
 
-function viewReplies($postId){
+function getReplies($commentId){
     $pdo = pdoSqlConnect();
-    $query = "select A.commentId,contents,isDeleted,createTime,A.writerNo,nickName,profileImg,IFNULL(likeCnt,0) as likeCnt,reply  from
-(SELECT contents,isDeleted,createTime,writerNo,commentId,reply from Comment where postId = ?
-    and reply is not null)A
-natural join (
-select no as writerNo ,nickName,profileImg from User)B
-left outer join (select commentId,count(userNo) as likeCnt from CommentLike group by commentId)C
-on A.commentId = C.commentId
-order by createTime;";
+    $query = "select commentId,writerNo,contents,isDeleted from Comment where reply = ?
+order by createTime";
     $st = $pdo->prepare($query);
-    $st->execute([$postId]);
+    $st->execute([$commentId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+    foreach ($res as $key => $result){
+        $res[$key]["commentCnt"] =  getCommentLikeCnt($result["commentId"]);
+    }
+    $st = null;
+    $pdo = null;
+
+    return $res;
+}
+
+function getCommentLikeCnt($commentId){
+    $pdo = pdoSqlConnect();
+    $query = "select count(userNo) as likeCnt from CommentLike where commentId = ?;";
+    $st = $pdo->prepare($query);
+    $st->execute([$commentId]);
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
 
     $st = null;
     $pdo = null;
 
-    return $res;
+    return $res[0]["likeCnt"];
+}
+
+function isUpdatePermissionOnComment($commentId, $userNo){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE commentId= ? AND writerNo = ? AND isDeleted = 0) AS exist;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$commentId, $userNo]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
+
+}
+
+function isCommentExists($commentId){
+    $pdo = pdoSqlConnect();
+    $query = "SELECT EXISTS(SELECT * FROM Comment WHERE commentId = ? AND isDeleted = 0) AS exist;";
+
+    $st = $pdo->prepare($query);
+    //    $st->execute([$param,$param]);
+    $st->execute([$commentId]);
+    $st->setFetchMode(PDO::FETCH_ASSOC);
+    $res = $st->fetchAll();
+
+    $st=null;$pdo = null;
+    return intval($res[0]["exist"]);
 }

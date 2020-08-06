@@ -3,6 +3,7 @@
 
 require './pdos/DatabasePdo.php';
 require './pdos/UserPdo.php';
+require './pdos/IndexPdo.php';
 require './pdos/CommentPdo.php';
 require './pdos/PostPdo.php';
 require './vendor/autoload.php';
@@ -29,8 +30,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('GET', '/user/post', ['PostController', 'userPost']);
     $r->addRoute('GET', '/user/{userNo}', ['UserController', 'userDetail']);
     $r->addRoute('POST', '/user', ['UserController', 'createUser']);
-    $r->addRoute('PUT', '/user', ['UserController', 'updateUser']);
-    $r->addRoute('DELETE', '/user/{userNo}', ['UserController', 'deleteUser']);
+    $r->addRoute('PUT', '/user/nickName', ['UserController', 'updateUserNick']);
+    $r->addRoute('PUT', '/user/profileImg', ['UserController', 'updateUserProfileImg']);
+    $r->addRoute('DELETE', '/user', ['UserController', 'deleteUser']);
 
     $r->addRoute('GET', '/category', ['PostController', 'category']);
     $r->addRoute('POST', '/post/write', ['PostController', 'createPost']);
@@ -45,9 +47,9 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/post/scrap', ['CommentController', 'scrap']);
     $r->addRoute('POST', '/post/comment/like', ['CommentController', 'commentLike']);
 
-    $r->addRoute('POST', '/post/{postId}/comment', ['CommentController', 'createComment']);
-    $r->addRoute('PUT', '/post/{postId}/comment', ['CommentController', 'updateComment']);
-    $r->addRoute('DELETE', '/post/{postId}/comment', ['CommentController', 'deleteComment']);
+    $r->addRoute('POST', '/post/comment', ['CommentController', 'createComment']);
+    $r->addRoute('PUT', '/post/comment', ['CommentController', 'updateComment']);
+    $r->addRoute('DELETE', '/post/comment', ['CommentController', 'deleteComment']);
     $r->addRoute('GET', '/post/{postId}/comment', ['CommentController', 'viewComments']);
     $r->addRoute('GET', '/post/{postId}/reply', ['CommentController', 'viewReplies']);
 
