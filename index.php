@@ -3,6 +3,7 @@
 
 require './pdos/DatabasePdo.php';
 require './pdos/UserPdo.php';
+require './pdos/IndexPdo.php';
 require './pdos/CommentPdo.php';
 require './pdos/PostPdo.php';
 require './vendor/autoload.php';
@@ -27,32 +28,29 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/jwt', ['MainController', 'createJwt']);
 
     $r->addRoute('GET', '/user/post', ['PostController', 'userPost']);
-    $r->addRoute('GET', '/user/{userNo}', ['UserController', 'userDetail']);
+    $r->addRoute('GET', '/user', ['UserController', 'userDetail']);
     $r->addRoute('POST', '/user', ['UserController', 'createUser']);
-    $r->addRoute('PUT', '/user', ['UserController', 'updateUser']);
-    $r->addRoute('DELETE', '/user/{userNo}', ['UserController', 'deleteUser']);
+    $r->addRoute('PUT', '/user/nickName', ['UserController', 'updateUserNick']);
+    $r->addRoute('PUT', '/user/profileImg', ['UserController', 'updateUserProfileImg']);
+    $r->addRoute('DELETE', '/user', ['UserController', 'deleteUser']);
 
     $r->addRoute('GET', '/category', ['PostController', 'category']);
+    $r->addRoute('GET', '/category/{categoryId}', ['PostController', 'boardInCategory']);
     $r->addRoute('POST', '/post/write', ['PostController', 'createPost']);
-    $r->addRoute('GET', '/{categoryId}/{boardId}/list', ['PostController', 'postList']);
+    $r->addRoute('GET', '/post/list', ['PostController', 'postList']);
     //$r->addRoute('GET', '/{categoryId}/{boardId}/post/{postId}', ['IndexController', 'postList']);
     $r->addRoute('GET', '/post/{postId}', ['PostController', 'viewPost']);
     $r->addRoute('DELETE', '/post', ['PostController', 'deletePost']);
     $r->addRoute('PUT', '/post', ['PostController', 'updatePost']);
     $r->addRoute('GET', '/post', ['PostController', 'searchPost']);
-    $r->addRoute('GET', '/hot', ['PostController', "hotPostList"]);
-    $r->addRoute('GET', '/best', ['PostController', "bestPostList"]);
 
     $r->addRoute('POST', '/post/like', ['CommentController', 'like']);
     $r->addRoute('POST', '/post/scrap', ['CommentController', 'scrap']);
     $r->addRoute('POST', '/post/comment/like', ['CommentController', 'commentLike']);
 
-    $r->addRoute('POST', '/post/{postId}/comment', ['CommentController', 'createComment']);
-    $r->addRoute('PUT', '/post/{postId}/comment', ['CommentController', 'updateComment']);
-    $r->addRoute('DELETE', '/post/{postId}/comment', ['CommentController', 'deleteComment']);
-    $r->addRoute('GET', '/post/{postId}/comment', ['CommentController', 'viewComments']);
-    $r->addRoute('GET', '/post/{postId}/reply', ['CommentController', 'viewReplies']);
-
+    $r->addRoute('POST', '/post/comment', ['CommentController', 'createComment']);
+    $r->addRoute('PUT', '/post/comment', ['CommentController', 'updateComment']);
+    $r->addRoute('DELETE', '/post/comment', ['CommentController', 'deleteComment']);
 
     //categoryID, boardID 말고 각각 이름읗 PK로 하고 url에 넣었으면 좋았을텐데..
 
