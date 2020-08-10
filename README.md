@@ -2,7 +2,7 @@
 에브리타임 서버 모의 제작
 
 #사용한 stack
-AWS EC2(ubuntu 16.04), Mysql server 5.7.1, nginx1.10.3, php7.0.25
+<p>AWS EC2(ubuntu 16.04), Mysql server 5.7.1, nginx1.10.3, php7.0.25 </p>
 Datagrip, Postman, PhpStorm
 
 #API 목록 (Rest API)
