@@ -128,7 +128,7 @@ order by createTime;";
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
     foreach ($res as $key => $result){
-        $res[$key]["commentCnt"] =  getCommentLikeCnt($result["commentId"]);
+        $res[$key]["commentLikeCnt"] =  getCommentLikeCnt($result["commentId"]);
         $res[$key]["reply"] = getReplies($result["commentId"]);
     }
     $st = null;
@@ -146,7 +146,7 @@ order by createTime";
     $st->setFetchMode(PDO::FETCH_ASSOC);
     $res = $st->fetchAll();
     foreach ($res as $key => $result){
-        $res[$key]["commentCnt"] =  getCommentLikeCnt($result["commentId"]);
+        $res[$key]["commentLikeCnt"] =  getCommentLikeCnt($result["commentId"]);
     }
     $st = null;
     $pdo = null;

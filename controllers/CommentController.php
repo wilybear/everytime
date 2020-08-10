@@ -83,21 +83,21 @@ try {
             }
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(!isValidPost($req->postId)){
-                failRes($res,"존재하지 않는 게시글",204);
+                failRes($res,"존재하지 않는 게시글입니다",214);
                 //삭제되었거나 없는 게시글
                 break;
             }
             if($req->reply != null){
                 if(!isCommentExistsInPost($req->postId,$req->reply)){
-                    failRes($res,"존재하지 않는 댓글에 답글을 쓸 수 없습니다.",204);
+                    failRes($res,"존재하지 않는 댓글에 답글을 쓸 수 없습니다.",216);
                     break;
                 }
             }
             if(!preg_match($comment_content_regex,$req->contents)){
-                failRes($res,"컨텐츠값 오류",203);
+                failRes($res,"댓글 내용이 올바르지 않습니다.",218);
                 break;
             }
-            $res->result = createComment($req->postId, $userNo,$req->contents,$req->reply);
+            createComment($req->postId, $userNo,$req->contents,$req->reply);
             successRes($res,"댓글 작성 성공");
             break;
         case "updateComment":
@@ -110,19 +110,19 @@ try {
             }
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(!isCommentExists($req->commentId)){
-                failRes($res,"존재하지 않는 댓글",203);
+                failRes($res,"존재하지 않는 댓글입니다.",217);
                 break;
             }
             if(!isCommentExistsInPost($req->postId,$req->commentId)){
-                failRes($res,"해당 게시글에 존재하지 않는 댓글",203);
+                failRes($res,"해당 게시글에 존재하지 않는 댓글",216);
                 break;
             }
             if(!isUpdatePermissionOnComment($req->commentId,$userNo)){
-                failRes($res,"권한 없음",206);
+                failRes($res,"권한이 없습니다.",215);
                 break;
             }
             if(!preg_match($comment_content_regex,$req->contents)){
-                failRes($res,"컨텐츠값 오류",203);
+                failRes($res,"댓글 내용이 올바르지 않습니다.",218);
                 break;
             }
             updateComment($req->commentId,$req->contents);
@@ -138,11 +138,11 @@ try {
             }
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             if(!isCommentExists($_GET["commentId"])){
-                failRes($res,"존재하지 않는 댓글",203);
+                failRes($res,"존재하지 않는 댓글입니다",217);
                 break;
             }
             if(!isUpdatePermissionOnComment($_GET["commentId"],$userNo)){
-                failRes($res,"권한 없음",206);
+                failRes($res,"권한이 없습니다.",215);
                 break;
             }
             deleteComment($_GET["commentId"]);

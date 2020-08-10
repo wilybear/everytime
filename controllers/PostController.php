@@ -37,33 +37,36 @@ try {
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
             if(!preg_match($title_regex,$req->title)){
-                failRes($res,"제목값 오류",203);
+                failRes($res,"제목이 올바르지 않습니다.",212);
                 break;
             }
             if(!preg_match($content_regex,$req->content)){
-                failRes($res,"컨텐츠 오류",203);
+                failRes($res,"내용이 올바르지 않습니다.",213);
                 break;
             }
-            $res->result = createPost($req->boardId,$userNo,$req->title,$req->content);
+            createPost($req->boardId,$userNo,$req->title,$req->content);
             successRes($res,"post생성 성공");
             break;
         case "category":
-            http_response_code(200);
-            if($_GET["categoryId"]==NULL) {
-                $res->result = getCategoryList();
-            }else{
-                if(!isValidCategory($_GET["categoryId"])){
-                    failRes($res,"존재하지 않는 카테고리",204);
-                    break;
-                }
-                $res->result = getBoardWithCategory($_GET["categoryId"]);
-            }
+            $res->result = getCategoryList();
             successRes($res,"카테고리 조회 성공");
+            break;
+        case "boardInCategory":
+            http_response_code(200);
+            if(!isValidCategory($vars["categoryId"])){
+                failRes($res,"존재하지 않는 카테고리",209);
+                break;
+            }
+            $res->result = getBoardWithCategory($vars["categoryId"]);
+            successRes($res,"카테고리 내 게시판 조회 성공");
             break;
         case "postList":
             http_response_code(200);
             switch ($_GET["option"]){
                 case "all":
+                    if($_GET["boardId"] == null){
+                        failRes($res,"게시판 id가 필요합니다.",210);
+                    }
                     $res->result =  getPostListByBoardId($_GET["boardId"],$_GET["lastIdx"]);
                     successRes($res,"게시판 불러오기");
                     break;
@@ -76,7 +79,7 @@ try {
                     successRes($res,"best게시판 불러오기");
                     break;
                 case "default":
-                    failRes($res,"wrong option",202);
+                    failRes($res,"wrong option",211);
                     break;
             }
             break;
@@ -102,12 +105,12 @@ try {
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
             if(!isValidPost($_GET["postId"])){
-                failRes($res,"존재하지 않는 게시글",204);
+                failRes($res,"존재하지 않는 게시글입니다.",214);
                 //삭제되었거나 없는 게시글
                 break;
             }
             if(!isUpdatePermissionOnPost($_GET["postId"],$userNo)){
-                failRes($res,"권한 없음",206);
+                failRes($res,"권한이 없습니다",215);
                 break;
             }
             deletePost($_GET["postId"]);
@@ -124,28 +127,32 @@ try {
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
 
             if(!isValidPost($req->postId)){
-                failRes($res,"존재하지 않는 게시글",204);
+                failRes($res,"존재하지 않는 게시글입니다.",214);
                 //삭제되었거나 없는 게시글
                 break;
             }
             if(!isUpdatePermissionOnPost($req->postId,$userNo)){
-                failRes($res,"권한 없음",206);
+                failRes($res,"권한이 없습니다",215);
                 break;
             }
             if(!preg_match($title_regex,$req->title)){
-                failRes($res,"제목값 오류",203);
+                failRes($res,"제목이 올바르지 않습니다.",212);
                 break;
             }
             if(!preg_match($content_regex,$req->content)){
-                failRes($res,"컨텐츠 오류",203);
+                failRes($res,"내용이 올바르지 않습니다.",213);
                 break;
             }
-            $res->result = updatePost($req->postId,$req->title, $req->content);
+            updatePost($req->postId,$req->title, $req->content);
             successRes($res,"post 수정 성공");
             break;
 
         case "searchPost":
             http_response_code(200);
+            if($_GET["lastIdx"]==null || $_GET["searchKey"]==null){
+                failRes($res, "wrong options", 211);
+                break;
+            }
             $res->result = searchPost($_GET["searchKey"],$_GET["lastIdx"]);
             successRes($res,"post 검색 성공");
             break;
@@ -172,7 +179,7 @@ try {
                     successRes($res, "Scrap 불러오기 성공");
                     break;
                 case "default":
-                    failRes($res, "wrong options", 200);
+                    failRes($res, "wrong options", 211);
                     break;
             }
 

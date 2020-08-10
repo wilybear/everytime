@@ -28,13 +28,14 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/jwt', ['MainController', 'createJwt']);
 
     $r->addRoute('GET', '/user/post', ['PostController', 'userPost']);
-    $r->addRoute('GET', '/user/{userNo}', ['UserController', 'userDetail']);
+    $r->addRoute('GET', '/user', ['UserController', 'userDetail']);
     $r->addRoute('POST', '/user', ['UserController', 'createUser']);
     $r->addRoute('PUT', '/user/nickName', ['UserController', 'updateUserNick']);
     $r->addRoute('PUT', '/user/profileImg', ['UserController', 'updateUserProfileImg']);
     $r->addRoute('DELETE', '/user', ['UserController', 'deleteUser']);
 
     $r->addRoute('GET', '/category', ['PostController', 'category']);
+    $r->addRoute('GET', '/category/{categoryId}', ['PostController', 'boardInCategory']);
     $r->addRoute('POST', '/post/write', ['PostController', 'createPost']);
     $r->addRoute('GET', '/post/list', ['PostController', 'postList']);
     //$r->addRoute('GET', '/{categoryId}/{boardId}/post/{postId}', ['IndexController', 'postList']);
@@ -50,9 +51,6 @@ $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) 
     $r->addRoute('POST', '/post/comment', ['CommentController', 'createComment']);
     $r->addRoute('PUT', '/post/comment', ['CommentController', 'updateComment']);
     $r->addRoute('DELETE', '/post/comment', ['CommentController', 'deleteComment']);
-    $r->addRoute('GET', '/post/{postId}/comment', ['CommentController', 'viewComments']);
-    $r->addRoute('GET', '/post/{postId}/reply', ['CommentController', 'viewReplies']);
-
 
     //categoryID, boardID 말고 각각 이름읗 PK로 하고 url에 넣었으면 좋았을텐데..
 

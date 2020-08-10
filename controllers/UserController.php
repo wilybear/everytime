@@ -93,16 +93,16 @@ try {
             $check_nick = preg_match($nick_regex,$req->nickName);
 
             if($check_nick!=true){
-                failRes($res,"nickname값 에러",203);
+                failRes($res,"올바르지 않은 닉네임입니다.",203);
                 //4~15자 영어 숫자 한글만
                 break;
             }
             if(isNickNameUnique($req->nickName)){
-                failRes($res,"해당 닉네임 존재",204);
+                failRes($res,"중복된 닉네임이 존재합니다.",204);
                 break;
             }
             if($req->nickName) {
-                $res->result = updateUserNickName($userNo, $req->nickName);
+                updateUserNickName($userNo, $req->nickName);
             }else{
                 failRes($res,"wrong query",202);
                 break;
@@ -121,12 +121,12 @@ try {
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             $check_img = preg_match($img_regex,$req->profileImg);
             if(!$check_img){
-                failRes($res,"jpg png bmp 형식이 아님",203);
+                failRes($res,"jpg png bmp 형식이 아닙니다",205);
                 break;
             }
 
             if($req->profileImg){
-                $res->result = updateUserProfileImg($userNo,$req->profileImg);
+                updateUserProfileImg($userNo,$req->profileImg);
             }else{
                 failRes($res,"wrong query",202);
                 break;
@@ -137,38 +137,38 @@ try {
 
             $check_nick = preg_match($nick_regex,$req->nickName);
             if($check_nick!=true){
-                failRes($res,"nickname값 에러",203);
+                failRes($res,"올바르지 않은 닉네임입니다.",203);
                 //4~15자 영어 숫자 한글만
                 break;
             }
             if(isNickNameUnique($req->nickName)){
-                failRes($res,"해당 닉네임 존재",204);
+                failRes($res,"중복된 닉네임이 존재합니다.",204);
                 break;
             }
             if($req->profileImg!=null){
                 $check_img = preg_match($img_regex,$req->profileImg);
                 if(!$check_img){
-                    failRes($res,"jpg png bmp 형식이 아님",203);
+                    failRes($res,"jpg png bmp 형식이 아닙니다",205);
                     break;
                 }
             }
             $check_id = preg_match($id_regex,$req->userId);
             if($check_id!=true){
-                failRes($res,"아이디 값 에러",203);
+                failRes($res,"올바르지 않은 ID입니다.",206);
                 //5~15자 영어 숫자
                 break;
             }
             if(isIdUnique($req->userId)){
-                failRes($res,"해당 ID 존재",204);
+                failRes($res,"중복된 ID가 존재합니다",207);
                 break;
             }
             $check_pwd = preg_match($pwd_regex,$req->userPwd);
             if($check_pwd!=true){
-                failRes($res,"비밀번호 값 에러",203);
+                failRes($res,"올바르지 않은 비밀번호입니다.",208);
                 //10~20자 영어 숫자 특수문자
                 break;
             }
-            $res->result = createUser($req->userId,$req->userPwd,$req->nickName,$req->studentId,$req->collegeName,$req->profileImg);
+            createUser($req->userId,$req->userPwd,$req->nickName,$req->studentId,$req->collegeName,$req->profileImg);
             successRes($res,"유저 생성 성공");
             break;
         case "deleteUser":
@@ -181,7 +181,7 @@ try {
             }
             $userNo = getUserNoFromHeader($jwt, JWT_SECRET_KEY);
             http_response_code(200);
-            $res->result = deleteUser($userNo);
+            deleteUser($userNo);
             successRes($res,"유저 삭제 성공");
             break;
      
