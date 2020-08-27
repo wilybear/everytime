@@ -1,5 +1,5 @@
 <h1># everytime</h1>
-에브리타임 서버 모의 제작
+에브리타임 게시판 서버 모의 제작
 
 <h2>#사용한 stack</h2>
 <p>AWS EC2(ubuntu 16.04), Mysql server 5.7.1, nginx1.10.3, php7.0.25 </p>
